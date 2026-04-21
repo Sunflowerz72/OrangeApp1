@@ -30,22 +30,18 @@ Orange App brings all of these features into one platform so users can manage th
 ### Payments
 
 Send and receive money between users
-**Notes:** Fast transfers, simple UI, and optional payment notes for tracking what each transaction was for
 
 ### Budgeting
 
 Track income and expenses, organize spending into categories
-**Notes:** Basic budgeting system with categories and visual breakdowns of spending
 
 ### Investment Tracking
 
 View real-time stock prices and track portfolio performance
-**Notes:** Live price updates and simple portfolio overview for quick insights
 
 ### Dashboard
 
 View balance, transactions, budget, and investments in one place
-**Notes:** Clean, centralized dashboard showing everything at a glance
 
 ---
 
