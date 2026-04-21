@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=390, initial-scale=1.0, user-scalable=no">
+ <link rel="icon" type="image/x-icon" href="logo.png">
+ <title>Transactions - OrangeApp</title>
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <div class="app-shell">
+ <header>
+   <a href="transactions.html" class="header-link">💸</a>
+
+
+ </header>
+
+ <main style="padding: 20px 16px 30px;">
+   <h2>Stock Transactions</h2>
+   <div class="transactions-list glass-card" id="transactions-list" style="padding:20px;">
+     <p>Loading trades...</p>
+   </div>
+ </main>
+
+ <!-- Bottom Tab Bar -->
+ <nav class="tab-bar" style="position: static; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(40px); border-top: 1px solid rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 12px 24px; margin: 0 16px 20px; border-radius: 28px; height: 76px;">
+   <a href="home.html" class="tab-item"><span>🏠</span><span style="font-size:0.75rem;margin-top:2px">Home</span></a>
+   <a href="send.html" class="tab-item"><span>📤</span><span style="font-size:0.75rem;margin-top:2px">Send</span></a>
+   <a href="budget.html" class="tab-item"><span>💰</span><span style="font-size:0.75rem;margin-top:2px">Budget</span></a>
+   <a href="stocks.html" class="tab-item"><span>📈</span><span style="font-size:0.75rem;margin-top:2px">Stocks</span></a>
+ </nav>
+ </div>
+
+ <script type="module">
+   import { initStocks, getTransactions } from './stocks.js';
+   import './profile.js';
+
+   // Render trades
+   function renderTransactions() {
+     const trades = getTransactions();
+     const list = document.getElementById('transactions-list');
+     if (trades.length === 0) {
+       list.innerHTML = '<p style="text-align: center; padding: 40px; opacity: 0.8;">No stock trades yet. Buy/sell on Stocks tab!</p>';
+       return;
+     }
+list.innerHTML = trades.map(trade => {
+       const icon = trade.type === 'buy' ? '🟢' : '🔴';
+       const amtClass = trade.type === 'buy' ? 'negative' : 'positive';
+       const net = trade.type === 'buy' ? -(trade.cost || trade.price * trade.quantity) : (trade.proceeds || trade.price * trade.quantity);
+       const date = new Date(trade.time).toLocaleString();
+       return `
+         <div style="height:24px"></div>
+
+<div class="transaction glass-card" style="padding:24px; gap:24px">
+           <div style="font-size:1.8rem; width:48px; text-align:center">${icon}</div>
+           <div style="flex:1; min-width:0">
+             <div class="description" style="font-weight:700; font-size:1.1rem; margin-bottom:4px">${trade.type.toUpperCase()} ${trade.quantity || 1}x ${trade.symbol || 'Stock'} @ $${(trade.price || 0).toFixed(2)}</div>
+             <div style="font-size:0.9rem; opacity:0.7">${date}</div>
+           </div>
+           <span class="amount ${amtClass}" style="font-size:1.2rem; font-weight:700; white-space:nowrap">$${net.toFixed(2)}</span>
+         </div>
+       `;
+     }).join('');
+   }
+
+   // Init
+   document.addEventListener('DOMContentLoaded', () => {
+     initStocks();
+     renderTransactions();
+   });
+ </script>
+</body>
+</html>
+

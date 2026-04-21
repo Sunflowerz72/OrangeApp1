@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=390, initial-scale=1.0, user-scalable=no">
+ <link rel="icon" type="image/x-icon" href="logo.png">
+ <title>Settings - OrangeApp</title>
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <div class="app-shell">
+  <header>
+   <a href="transactions.html" class="header-link">💸</a>
+   <h1 class="header-title">OrangeApp</h1>
+   <img id="profile-avatar" class="profile-avatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDQiIGhlaWdodD0iNDQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjRkY5NTAwIi8+CjxwYXRoIGQ9Ik0yMCAxMkMyMCAxNi4zOTcgMTYuMzk3IDE2IDEyIDE2QzcuNjAyOTQgMTYgNCAxNi4zOTcgNCAxMkM0IDcuNjAyOTQgNy42MDI5NCA0IDEyIDRDMTYuMzk3IDQgMjAgNy42MDI5NCAyMCAxMloiIGZpbGw9InJnYmEoKDI1NSwgMjU1LCAyNTUsIDAuOCkiLz4KPC9zdmc+" title="Edit Profile">
+  </header>
+
+  <main style="padding: 20px 16px 100px;">
+   <h2>Profile</h2>
+   
+   <!-- Profile Editor -->
+
+   <div class="glass-card" style="text-align:center;padding:40px;">
+
+    <img src="logo.png" style="width:120px;height:120px;border-radius:50%; border:3px solid rgba(255,149,0,0.5); margin-bottom:24px;">
+
+    
+    <input type="text" id="username-input" placeholder="Your Name" value="" maxlength="20" style="width:100%; margin-bottom:12px; text-align:center; font-size:1.4rem; font-weight:700; padding:16px; border-radius:16px; border:1px solid rgba(255,149,0,0.3); background:rgba(255,255,255,0.1);">
+    
+    <div style="opacity:0.8; font-size:1rem; margin-bottom:24px;">PFP set to app logo. Name saved locally.</div>
+    
+    <button class="log-expense" onclick="saveProfile()" style="width:100%; padding:20px; font-size:1.1rem;">
+     💾 Save Name
+    </button>
+   </div>
+
+
+
+
+  
+  </main>
+
+  <nav class="tab-bar">
+   <a href="home.html" class="tab-item active"><span>🏠</span>Home</a>
+   <a href="send.html" class="tab-item"><span>📤</span>Send</a>
+   <a href="budget.html" class="tab-item"><span>💰</span>Budget</a>
+   <a href="stocks.html" class="tab-item"><span>📈</span>Stocks</a>
+  </nav>
+ </div>
+
+ <script>
+  // Silhouette base PFP (SVG - always works)
+  const BASE_PFP = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMTIgMTJDMTQuMjA5MSAxMiAxNiAxMC4yMDkxIDE2IDhDMzIgNS43OTA4NiAxNC4yMDkxIDQgMTIgNEM5Ljc5MDg2IDQgOCA1Ljc5MDg2IDggOEM4IDEwLjIwOTEgOS43OTA4NiAxMiAxMiAxMloiIGZpbGw9IiNGRjkwMCIvPgo8cGF0aCBkPSJNMjAgMTJDMjAgMTYuMzk3IDE2LjM5NyAxNiAxMiAxNkM3LjYwMjk0IDE2IDQgMTYuMzk3IDQgMTJDNCA3LjYwMjk0IDcuNjAyOTQgNCAxMiA0QzE2LjM5NyA0IDIwIDcuNjAyOTQgMjAgMTJaIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuOCkiLz4KPC9zdmc+';
+
+  // Load/Save profile (persists forever)
+  function loadProfile() {
+   try {
+    const saved = localStorage.getItem('orangeProfile');
+    if (saved) {
+     const profile = JSON.parse(saved);
+     document.getElementById('username-input').value = profile.username || '';
+     document.getElementById('user-avatar').src = profile.avatar || BASE_PFP;
+     document.getElementById('preview-avatar').src = profile.avatar || BASE_PFP;
+     document.getElementById('preview-username').textContent = profile.username || 'Your Name';
+     
+     // Preferences
+     document.getElementById('alerts-toggle').checked = profile.alerts || false;
+     document.getElementById('dark-mode-toggle').checked = profile.darkMode || false;
+     
+     // Update EVERYWHERE instantly
+     updateAllAvatars(profile.avatar || BASE_PFP);
+     return;
+    }
+   } catch(e) { console.log('Load profile error:', e); }
+   
+   // Default
+   document.getElementById('user-avatar').src = BASE_PFP;
+   document.getElementById('preview-avatar').src = BASE_PFP;
+   document.getElementById('preview-username').textContent = 'Your Name';
+  }
+
+  function saveProfile() {
+   const username = document.getElementById('username-input').value.trim() || 'Your Name';
+   const alerts = document.getElementById('alerts-toggle').checked;
+   const darkMode = document.getElementById('dark-mode-toggle').checked;
+   
+   const profile = {
+    username,
+    avatar: document.getElementById('user-avatar').src,
+    alerts,
+    darkMode,
+    timestamp: Date.now()
+   };
+   
+   localStorage.setItem('orangeProfile', JSON.stringify(profile));
+   
+   // Live preview
+   document.getElementById('preview-username').textContent = username;
+   
+   // Update ALL PFPs instantly
+   updateAllAvatars(profile.avatar);
+   
+   alert(`✅ Saved "${username}" + your photo!\nPersists forever on this computer.`);
+  }
+
+  function resetProfile() {
+   localStorage.removeItem('orangeProfile');
+   location.reload();
+  }
+
+  // Update ALL profile pics (header + everywhere)
+  function updateAllAvatars(src) {
+   // Header top right
+   const headers = document.querySelectorAll('header img.profile-avatar');
+   headers.forEach(img => img.src = src);
+   
+   // Settings preview/user avatar
+   document.getElementById('user-avatar').src = src;
+   document.getElementById('preview-avatar').src = src;
+  }
+
+  // Photo upload
+  document.addEventListener('DOMContentLoaded', () => {
+   const upload = document.getElementById('pfp-upload');
+   upload.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file?.type.startsWith('image/')) {
+     const reader = new FileReader();
+     reader.onload = (ev) => {
+      document.getElementById('user-avatar').src = ev.target.result;
+      document.getElementById('preview-avatar').src = ev.target.result;
+     };
+     reader.readAsDataURL(file);
+    }
+   };
+   
+   // Avatar click = upload
+   document.getElementById('user-avatar').onclick = () => upload.click();
+  });
+
+  // Auto load
+  loadProfile();
+ </script>
+
+ <style>
+  .settings-row {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   padding: 16px;
+   cursor: pointer;
+   border-radius: 12px;
+   transition: all 0.2s;
+   margin-bottom: 8px;
+  }
+  .settings-row:hover {
+   background: rgba(255,255,255,0.1);
+  }
+  input:focus, button:focus {
+   outline: none;
+   box-shadow: 0 0 0 3px rgba(255,149,0,0.3);
+  }
+ </style>
+</body>
+</html>
+

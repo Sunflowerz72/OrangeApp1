@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=390, initial-scale=1.0, user-scalable=no">
+ <link rel="icon" type="image/x-icon" href="logo.png">
+ <title>Budgeting - OrangeApp</title>
+ <link rel="stylesheet" href="style.css">
+ <style>
+  .budget-categories { display:flex; flex-direction:column; gap:24px; margin-bottom:32px; }
+  .category { 
+   display:flex; align-items:center; justify-content:space-between; 
+   padding:24px; gap:20px;
+  }
+  .category-left { display:flex; align-items:center; gap:16px; flex:1 }
+  .category-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:120px }
+  .spent-input { padding:12px 16px; border-radius:16px; border:1px solid rgba(255,149,0,0.4); background:rgba(255,149,0,0.1); color:white; font-weight:600; text-align:center; width:100%; font-size:1rem }
+  .spent-input:focus { border-color:rgba(255,149,0,0.8); box-shadow:0 0 0 2px rgba(255,149,0,0.2); outline:none }
+  .add-category { background:linear-gradient(135deg,rgba(255,149,0,0.3),rgba(255,69,0,0.2)); border:1px solid rgba(255,149,0,0.5); padding:20px; border-radius:24px; width:100%; font-weight:700; margin:28px 0; }
+  .add-category:hover { background:linear-gradient(135deg,rgba(255,149,0,0.5),rgba(255,69,0,0.4)); transform:translateY(-2px) }
+  .summary { padding:28px; text-align:center; margin-bottom:36px; }
+ </style>
+</head>
+<body>
+ <div class="app-shell">
+ <header>
+   <a href="transactions.html" class="header-link">💸</a>
+   <h1 class="header-title">OrangeApp</h1>
+
+   <img class="profile-avatar" src="logo.png" onclick="window.location.href='settings.html'" title="Profile">
+
+ </header>
+
+ <main style="padding:24px 20px 140px">
+  <div class="summary glass-card">
+   <h3>Monthly Budget</h3>
+   <div style="font-size:2.2rem;font-weight:900">$2,000</div>
+   <p style="opacity:0.8">Spent $1,250 | Remaining $750</p>
+  </div>
+
+  <div class="budget-categories">
+   <div class="category glass-card">
+    <div class="category-left">
+     <span style="font-size:1.8rem">🍔</span>
+     <div>
+      <div style="font-weight:800;font-size:1.1rem">Food</div>
+      <div id="food-pct" style="opacity:0.8">60.0%</div>
+     </div>
+    </div>
+    <div class="category-right">
+     $<input class="spent-input" value="300" onchange="updateFood(this.value)" />
+     <div style="font-weight:600;font-size:0.9rem">/ $500</div>
+    </div>
+   </div>
+
+   <div class="category glass-card">
+    <div class="category-left">
+     <span style="font-size:1.8rem">✈️</span>
+     <div>
+      <div style="font-weight:800;font-size:1.1rem">Travel</div>
+      <div id="travel-pct" style="opacity:0.8">71.1%</div>
+     </div>
+    </div>
+    <div class="category-right">
+     $<input class="spent-input" value="320" onchange="updateTravel(this.value)" />
+     <div style="font-weight:600;font-size:0.9rem">/ $450</div>
+    </div>
+   </div>
+
+   <div class="category glass-card">
+    <div class="category-left">
+     <span style="font-size:1.8rem">🏠</span>
+     <div>
+      <div style="font-weight:800;font-size:1.1rem">Utilities</div>
+      <div id="util-pct" style="opacity:0.8">87.5%</div>
+     </div>
+    </div>
+    <div class="category-right">
+     $<input class="spent-input" value="350" onchange="updateUtil(this.value)" />
+     <div style="font-weight:600;font-size:0.9rem">/ $400</div>
+    </div>
+   </div>
+  </div>
+
+
+ </main>
+
+ <nav class="tab-bar" style="position: static; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(40px); border-top: 1px solid rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 12px 24px; margin: 0 16px 20px; border-radius: 28px; height: 76px;">
+  <a href="home.html" class="tab-item"><span>🏠</span><span style="font-size:0.75rem;margin-top:2px">Home</span></a>
+  <a href="send.html" class="tab-item"><span>📤</span><span style="font-size:0.75rem;margin-top:2px">Send</span></a>
+  <a href="budget.html" class="tab-item active"><span>💰</span><span style="font-size:0.75rem;margin-top:2px">Budget</span></a>
+  <a href="stocks.html" class="tab-item"><span>📈</span><span style="font-size:0.75rem;margin-top:2px">Stocks</span></a>
+ </nav>
+
+ <div id="custom-modal" class="modal">
+  <div class="modal-content glass-card" style="padding:32px">
+   <span class="close" onclick="closeCustom()" style="float:right;font-size:2rem">&times;</span>
+   <h3>Add Custom Category</h3>
+   <input id="cat-icon" placeholder="Emoji 🏠🍔✈️" style="width:100%;padding:16px;margin:16px 0">
+   <input id="cat-name" placeholder="Name" style="width:100%;padding:16px;margin-bottom:16px">
+   <input id="cat-budget" type="number" placeholder="$ Budget" style="width:100%;padding:16px">
+   <button onclick="saveCustom()" class="add-category" style="width:100%;margin-top:16px">Add</button>
+  </div>
+ </div>
+
+ <script>
+  const budgets = {food:500, travel:450, util:400};
+  let spent = {food:300, travel:320, util:350};
+
+  function updatePct(id, budget, amount) {
+   const pct = (amount/budget*100).toFixed(1);
+   document.getElementById(id).textContent = pct + '%';
+  }
+
+  window.updateFood = v => {
+   spent.food = +v;
+   updatePct('food-pct', budgets.food, spent.food);
+  };
+
+  window.updateTravel = v => {
+   spent.travel = +v;
+   updatePct('travel-pct', budgets.travel, spent.travel);
+  };
+
+  window.updateUtil = v => {
+   spent.util = +v;
+   updatePct('util-pct', budgets.util, spent.util);
+  };
+
+  window.addCustom = () => document.getElementById('custom-modal').style.display = 'block';
+
+  window.saveCustom = () => {
+   const icon = document.getElementById('cat-icon').value || '📊';
+   const name = document.getElementById('cat-name').value;
+   const budget = +document.getElementById('cat-budget').value;
+   if (name && budget>0) {
+    alert(`Added ${icon} ${name} $${budget}`);
+    closeCustom();
+   }
+  };
+
+  window.closeCustom = () => document.getElementById('custom-modal').style.display = 'none';
+
+  // Profile
+  document.getElementById('profile-avatar').src = localStorage.getItem('orange-user-avatar') || 'data:image/svg+xml;base64,...';
+
+  // Auto-save
+  setInterval(() => localStorage.budgetSpent = JSON.stringify(spent), 2000);
+ </script>
+</body>
+</html>
+

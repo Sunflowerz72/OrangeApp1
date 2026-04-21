@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=390, initial-scale=1.0, user-scalable=no">
+ <link rel="icon" type="image/x-icon" href="logo.png">
+ <title>Send - OrangeApp</title>
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <div class="app-shell" style="overflow: hidden;">
+ <header>
+   <a href="transactions.html" class="header-link">💸</a>
+   <h1 class="header-title">OrangeApp</h1>
+
+   <img class="profile-avatar" src="logo.png" onclick="window.location.href='settings.html'" title="Profile">
+
+ </header>
+
+ <main style="padding: 20px 16px 30px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+   <section class="balance-panel">
+     <div class="cash-balance">
+       <div class="balance-head">
+         <span class="cash-balance-label">Send Amount</span>
+         <span class="cash-balance-change" id="balance-change">Balance $1,250.00</span>
+       </div>
+<p class="cash-balance-amount">$<span id="send-amount">0</span></p>
+<div id="feedback" style="text-align:center;padding:12px;color:#4ade80;font-weight:600;display:none;"></div>
+     </div>
+   </section>
+
+   <section class="keypad-panel">
+     <div class="keypad">
+       <button class="key" onclick="addNumber('1')">1</button>
+       <button class="key" onclick="addNumber('2')">2</button>
+       <button class="key" onclick="addNumber('3')">3</button>
+       <button class="key" onclick="addNumber('4')">4</button>
+       <button class="key" onclick="addNumber('5')">5</button>
+       <button class="key" onclick="addNumber('6')">6</button>
+       <button class="key" onclick="addNumber('7')">7</button>
+       <button class="key" onclick="addNumber('8')">8</button>
+       <button class="key" onclick="addNumber('9')">9</button>
+       <button class="key special" onclick="addDecimal()">.</button>
+       <button class="key" onclick="addNumber('0')">0</button>
+       <button class="key delete-key" onclick="deleteLast()">⌫</button>
+     </div>
+
+     <div class="cash-buttons">
+       <button class="cash-pay-btn" onclick="requestPayment(event)">Pay</button>
+       <button class="cash-request-btn" onclick="requestMoney(event)">Request</button>
+     </div>
+   </section>
+ </main>
+
+ <nav class="tab-bar" style="position: static; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(40px); border-top: 1px solid rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 12px 24px; margin: 0 16px 20px; border-radius: 28px; height: 76px;">
+   <a href="home.html" class="tab-item"><span>🏠</span><span style="font-size:0.75rem;margin-top:2px">Home</span></a>
+   <a href="send.html" class="tab-item active"><span>📤</span><span style="font-size:0.75rem;margin-top:2px">Send</span></a>
+   <a href="budget.html" class="tab-item"><span>💰</span><span style="font-size:0.75rem;margin-top:2px">Budget</span></a>
+   <a href="stocks.html" class="tab-item"><span>📈</span><span style="font-size:0.75rem;margin-top:2px">Stocks</span></a>
+ </nav>
+ </div>
+
+ <script type="module">
+   import './profile.js';
+   import { cashBalance, updateCashBalance, initMoney } from './money.js';
+
+   initMoney();
+   document.getElementById('balance-change').textContent = `Balance $${cashBalance.toFixed(2)}`;
+
+   let currentAmount = '0';
+
+   // Keypad
+   window.addNumber = (num) => {
+     if (currentAmount === '0') currentAmount = num;
+     else currentAmount += num;
+     document.getElementById('send-amount').textContent = parseFloat(currentAmount).toFixed(2);
+   };
+
+   window.addDecimal = () => {
+     if (!currentAmount.includes('.')) {
+       currentAmount += '.';
+       document.getElementById('send-amount').textContent = parseFloat(currentAmount).toFixed(2);
+     }
+   };
+
+   window.deleteLast = () => {
+     if (currentAmount.length > 1) currentAmount = currentAmount.slice(0, -1);
+     else currentAmount = '0';
+     document.getElementById('send-amount').textContent = parseFloat(currentAmount).toFixed(2);
+   };
+
+   window.requestPayment = (event) => {
+     const payBtn = event.target;
+     payBtn.disabled = true;
+     payBtn.textContent = 'Processing...';
+     setTimeout(() => { payBtn.disabled = false; payBtn.textContent = 'Pay'; }, 2000);
+     const amount = parseFloat(currentAmount);
+     if (amount > 0 && amount <= cashBalance) {
+       const recipient = prompt('Enter recipient @username:');
+       if (recipient) {
+         updateCashBalance(-amount);
+         showFeedback(`✅ Paid $${amount.toFixed(2)} to ${recipient}`);
+         currentAmount = '0';
+         document.getElementById('send-amount').textContent = '0';
+       } else payBtn.disabled = false;
+     } else {
+       showFeedback('❌ Insufficient balance', true);
+       payBtn.disabled = false;
+     }
+   };
+
+   window.requestMoney = (event) => {
+     const reqBtn = event.target;
+     reqBtn.disabled = true;
+     reqBtn.textContent = 'Processing...';
+     setTimeout(() => { reqBtn.disabled = false; reqBtn.textContent = 'Request'; }, 2000);
+     const amount = parseFloat(currentAmount);
+     if (amount > 0) {
+       const sender = prompt('Request from @username:');
+       if (sender) {
+         updateCashBalance(+amount);
+         showFeedback(`✅ Received $${amount.toFixed(2)} from ${sender}`);
+         currentAmount = '0';
+         document.getElementById('send-amount').textContent = '0';
+       } else reqBtn.disabled = false;
+     } else {
+       showFeedback('❌ Invalid amount', true);
+       reqBtn.disabled = false;
+     }
+   };
+
+   function showFeedback(msg, isError = false) {
+     const fb = document.getElementById('feedback');
+     fb.textContent = msg;
+     fb.style.color = isError ? '#f87171' : '#4ade80';
+     fb.style.display = 'block';
+     setTimeout(() => fb.style.display = 'none', 3000);
+   }
+ </script>
+</body>
+</html>
